@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="24-Wk Log">
-  <title>24-Week Tactical Workout Logger</title>
+  <title>24 Week Workout Program</title>
   <style>
     :root { color-scheme: dark only !important; }
     * { 
@@ -153,7 +153,7 @@
 <body>
 
 <header>
-  <h1 id="appTitle">24-Week Training Log</h1>
+  <h1 id="appTitle">24 Week Workout Program</h1>
   <div class="controls">
     <select id="weekSelect"></select>
     <button class="btn-action" id="btnExport">Export</button>
@@ -425,8 +425,8 @@ function renderApp() {
   const appTitle = document.getElementById("appTitle");
   if (appTitle) {
     appTitle.innerHTML = isDeloadWeek 
-      ? `24-Week Log <span style="color:#f59e0b !important; font-size:0.95rem;">(Week ${currentWeek} Deload)</span>` 
-      : `24-Week Training Log`;
+      ? `24 Week Program <span style="color:#f59e0b !important; font-size:0.95rem;">(Week ${currentWeek} Deload)</span>` 
+      : `24 Week Workout Program`;
   }
 
   const container = document.getElementById("exerciseList");
