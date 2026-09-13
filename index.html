@@ -13,8 +13,24 @@
   <style>
     :root { color-scheme: dark only !important; }
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; color-scheme: dark only !important; }
-    html { background-color: #0f172a !important; height: 100%; }
-    body { background-color: #0f172a !important; color: #f8fafc !important; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; min-height: 100vh; padding: 16px; padding-top: calc(16px + env(safe-area-inset-top)); padding-bottom: calc(140px + env(safe-area-inset-bottom)) !important; max-width: 600px; margin: 0 auto; overflow-y: auto; }
+    
+    html { 
+      background-color: #0f172a !important; 
+      min-height: 100%;
+    }
+    
+    body { 
+      background-color: #0f172a !important; 
+      color: #f8fafc !important; 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+      min-height: 100dvh; 
+      padding: 16px; 
+      padding-top: calc(16px + env(safe-area-inset-top)); 
+      padding-bottom: calc(120px + env(safe-area-inset-bottom)) !important; 
+      max-width: 600px; 
+      margin: 0 auto; 
+    }
+
     header { position: sticky; top: 0; background-color: #0f172a !important; z-index: 90; padding-top: 8px; padding-bottom: 12px; border-bottom: 1px solid #334155 !important; }
     h1 { font-size: 1.2rem; font-weight: 700; margin-bottom: 10px; text-align: center; color: #60a5fa !important; }
     .controls { display: flex; gap: 8px; margin-bottom: 10px; }
@@ -69,24 +85,34 @@
     .matrix-table th, .matrix-table td { border: 1px solid #334155 !important; padding: 4px 6px; text-align: center; }
     .matrix-table th { background-color: #0f172a !important; color: #94a3b8 !important; }
 
-    /* Always Visible Fixed Bottom Rest Timer Bar */
+    /* Fixed Viewport Bottom Rest Timer Bar */
     #timerBar { 
       position: fixed !important; 
       bottom: 0 !important; 
       left: 0 !important; 
       right: 0 !important; 
+      width: 100% !important;
       background-color: #090d16 !important; 
       border-top: 3px solid #a855f7 !important; 
       padding: 12px 20px; 
-      padding-bottom: max(14px, env(safe-area-inset-bottom)) !important; 
-      z-index: 99999 !important; 
+      padding-bottom: max(12px, env(safe-area-inset-bottom)) !important; 
+      z-index: 999999 !important; 
       display: flex; 
       justify-content: space-between; 
       align-items: center; 
-      max-width: 600px; 
-      margin: 0 auto; 
       box-shadow: 0 -8px 25px rgba(0,0,0,0.85); 
+      transform: translateZ(0); /* Hardware acceleration for mobile sticky behavior */
     }
+    
+    .timer-inner {
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
     #timerDisplay { font-size: 1.6rem; font-weight: 800; color: #c084fc !important; font-family: monospace; letter-spacing: 1px; }
     .timer-controls { display: flex; gap: 8px; }
     .btn-timer-ctrl { background-color: #1e293b !important; border: 1px solid #334155 !important; color: #f8fafc !important; padding: 8px 14px; border-radius: 6px; font-size: 0.85rem; font-weight: 700; cursor: pointer; }
@@ -108,15 +134,17 @@
 
 <main id="exerciseList"></main>
 
-<!-- Fixed Rest Timer Bar -->
+<!-- Fixed Viewport Bottom Timer Bar -->
 <div id="timerBar">
-  <div>
-    <div style="font-size:0.68rem; color:#94a3b8; font-weight:700; text-transform:uppercase; letter-spacing: 0.5px;">Rest Timer</div>
-    <div id="timerDisplay">00:00</div>
-  </div>
-  <div class="timer-controls">
-    <button class="btn-timer-ctrl" id="btnTimerToggle">Pause</button>
-    <button class="btn-timer-ctrl" id="btnTimerReset">Stop</button>
+  <div class="timer-inner">
+    <div>
+      <div style="font-size:0.68rem; color:#94a3b8; font-weight:700; text-transform:uppercase; letter-spacing: 0.5px;">Rest Timer</div>
+      <div id="timerDisplay">00:00</div>
+    </div>
+    <div class="timer-controls">
+      <button class="btn-timer-ctrl" id="btnTimerToggle">Pause</button>
+      <button class="btn-timer-ctrl" id="btnTimerReset">Stop</button>
+    </div>
   </div>
 </div>
 
@@ -248,12 +276,6 @@ function startRestTimer(seconds) {
   
   const toggleBtn = document.getElementById("btnTimerToggle");
   if (toggleBtn) toggleBtn.innerText = "Pause";
-
-  // Auto-scroll fixed timer bar smoothly into full view if necessary
-  const timerBar = document.getElementById("timerBar");
-  if (timerBar) {
-    timerBar.scrollIntoView({ behavior: 'smooth', block: 'end' });
-  }
 
   timerInterval = setInterval(() => {
     if (timerIsRunning) {
