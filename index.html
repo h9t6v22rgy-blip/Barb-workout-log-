@@ -12,11 +12,21 @@
   <title>24-Week Tactical Workout Logger</title>
   <style>
     :root { color-scheme: dark only !important; }
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; color-scheme: dark only !important; }
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+      -webkit-tap-highlight-color: transparent; 
+      -webkit-text-size-adjust: 100%; 
+      text-size-adjust: 100%; 
+      color-scheme: dark only !important; 
+    }
     
     html { 
       background-color: #0f172a !important; 
       min-height: 100%;
+      height: 100%;
+      overscroll-behavior-y: none;
     }
     
     body { 
@@ -31,7 +41,15 @@
       margin: 0 auto; 
     }
 
-    header { position: sticky; top: 0; background-color: #0f172a !important; z-index: 90; padding-top: 8px; padding-bottom: 12px; border-bottom: 1px solid #334155 !important; }
+    header { 
+      position: sticky; 
+      top: 0; 
+      background-color: #0f172a !important; 
+      z-index: 90; 
+      padding-top: 8px; 
+      padding-bottom: 12px; 
+      border-bottom: 1px solid #334155 !important; 
+    }
     h1 { font-size: 1.2rem; font-weight: 700; margin-bottom: 10px; text-align: center; color: #60a5fa !important; }
     .controls { display: flex; gap: 8px; margin-bottom: 10px; }
     select { flex: 1; background-color: #1e293b !important; color: #f8fafc !important; border: 1px solid #334155 !important; padding: 10px; border-radius: 8px; font-size: 1rem; font-weight: 600; -webkit-appearance: none !important; appearance: none !important; background-image: url('data:image/svg+xml;utf8,<svg fill="%2394a3b8" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>'); background-repeat: no-repeat; background-position: right 8px center; background-size: 20px; }
@@ -85,7 +103,7 @@
     .matrix-table th, .matrix-table td { border: 1px solid #334155 !important; padding: 4px 6px; text-align: center; }
     .matrix-table th { background-color: #0f172a !important; color: #94a3b8 !important; }
 
-    /* Fixed Viewport Bottom Rest Timer Bar */
+    /* Guaranteed Fixed Viewport Bottom Rest Timer Bar */
     #timerBar { 
       position: fixed !important; 
       bottom: 0 !important; 
@@ -98,12 +116,18 @@
       padding-bottom: max(12px, env(safe-area-inset-bottom)) !important; 
       z-index: 999999 !important; 
       display: flex; 
-      justify-content: space-between; 
+      justify-content: center; 
       align-items: center; 
       box-shadow: 0 -8px 25px rgba(0,0,0,0.85); 
-      transform: translateZ(0); /* Hardware acceleration for mobile sticky behavior */
+      -webkit-transform: translateZ(0);
+      transform: translateZ(0);
+      transition: transform 0.2s ease-in-out;
     }
     
+    #timerBar.pulse {
+      transform: scale(1.02) translateZ(0);
+    }
+
     .timer-inner {
       width: 100%;
       max-width: 600px;
@@ -277,6 +301,12 @@ function startRestTimer(seconds) {
   const toggleBtn = document.getElementById("btnTimerToggle");
   if (toggleBtn) toggleBtn.innerText = "Pause";
 
+  const timerBar = document.getElementById("timerBar");
+  if (timerBar) {
+    timerBar.classList.add("pulse");
+    setTimeout(() => timerBar.classList.remove("pulse"), 200);
+  }
+
   timerInterval = setInterval(() => {
     if (timerIsRunning) {
       timerSecondsRemaining--;
@@ -305,6 +335,9 @@ function triggerTimerAlert() {
   }
   try {
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     osc.type = "sine";
@@ -342,37 +375,35 @@ function toggleMatrix(matrixContainerId, exName, defaultSets) {
     return;
   }
 
-  if (!container.dataset.rendered) {
-    let rows = "";
-    for (let w = 1; w <= 24; w++) {
-      const wKey = `W${w}_${currentDay}_${exName}`;
-      const isMatrixDeload = w % 4 === 0;
-      const totalSets = isMatrixDeload ? Math.max(1, Math.ceil(defaultSets / 2)) : defaultSets;
-      let rowStr = [];
-      for (let s = 0; s < totalSets; s++) {
-        const d = store[wKey]?.[s];
-        if (d && (d.weight || d.reps)) {
-          rowStr.push(`${d.weight || 0}x${d.reps || 0}`);
-        }
-      }
-      if (rowStr.length > 0) {
-        rows += `<tr><td>W${w}${isMatrixDeload ? ' (DL)' : ''}</td><td>${rowStr.join(", ")}</td></tr>`;
+  // Always dynamically pull and render fresh state
+  let rows = "";
+  for (let w = 1; w <= 24; w++) {
+    const wKey = `W${w}_${currentDay}_${exName}`;
+    const isMatrixDeload = w % 4 === 0;
+    const totalSets = isMatrixDeload ? Math.max(1, Math.ceil(defaultSets / 2)) : defaultSets;
+    let rowStr = [];
+    for (let s = 0; s < totalSets; s++) {
+      const d = store[wKey]?.[s];
+      if (d && (d.weight || d.reps)) {
+        rowStr.push(`${d.weight || 0}x${d.reps || 0}`);
       }
     }
-    container.querySelector('tbody').innerHTML = rows || '<tr><td colspan="2">No data logged yet</td></tr>';
-    container.dataset.rendered = "true";
+    if (rowStr.length > 0) {
+      rows += `<tr><td>W${w}${isMatrixDeload ? ' (DL)' : ''}</td><td>${rowStr.join(", ")}</td></tr>`;
+    }
   }
+  container.querySelector('tbody').innerHTML = rows || '<tr><td colspan="2">No data logged yet</td></tr>';
 
   container.style.display = "block";
 }
 
-// Helper to determine Superset properties
+// Improved helper to determine Superset properties cleanly
 function getSupersetInfo(name) {
-  const match = name.match(/^([A-Z])([12])\./);
+  const match = name.match(/^([A-Z])(\d+)\./i);
   if (!match) return { isSuperset: false };
   return {
     isSuperset: true,
-    group: match[1],
+    group: match[1].toUpperCase(),
     position: parseInt(match[2]),
     isFirst: match[2] === "1",
     isSecond: match[2] === "2"
@@ -456,7 +487,6 @@ function renderApp() {
         card.appendChild(notesDiv);
       }
     } else {
-      // Regular Exercise Layout
       const effectiveSets = isDeloadWeek ? Math.max(1, Math.ceil(ex.sets / 2)) : ex.sets;
 
       let setsContainer = document.createElement("div");
@@ -526,7 +556,6 @@ function renderApp() {
       const cardActions = document.createElement("div");
       cardActions.className = "card-actions";
 
-      // Display Rest Button: ONLY for non-supersets OR the second item of a superset (e.g. B2, C2, D2)
       if (ex.restSec && ex.restSec > 0) {
         if (!supersetInfo.isSuperset || supersetInfo.isSecond) {
           const timerBtn = document.createElement("button");
