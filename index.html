@@ -2,510 +2,630 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="color-scheme" content="dark only">
+  <meta name="supported-color-schemes" content="dark">
   <meta name="theme-color" content="#0f172a">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Tactical Log">
+  <meta name="apple-mobile-web-app-title" content="24-Wk Log">
   <title>24-Week Tactical Workout Logger</title>
   <style>
-    :root {
-      --bg-dark: #0f172a;
-      --card-bg: #1e293b;
-      --accent-blue: #38bdf8;
-      --accent-green: #22c55e;
-      --accent-amber: #f59e0b;
-      --accent-purple: #a855f7;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --border-color: #334155;
-    }
+    :root { color-scheme: dark only !important; }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; color-scheme: dark only !important; }
+    html { background-color: #0f172a !important; height: 100%; }
+    body { background-color: #0f172a !important; color: #f8fafc !important; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; min-height: 100vh; padding: 16px; padding-top: calc(16px + env(safe-area-inset-top)); padding-bottom: calc(140px + env(safe-area-inset-bottom)) !important; max-width: 600px; margin: 0 auto; overflow-y: auto; }
+    header { position: sticky; top: 0; background-color: #0f172a !important; z-index: 90; padding-top: 8px; padding-bottom: 12px; border-bottom: 1px solid #334155 !important; }
+    h1 { font-size: 1.2rem; font-weight: 700; margin-bottom: 10px; text-align: center; color: #60a5fa !important; }
+    .controls { display: flex; gap: 8px; margin-bottom: 10px; }
+    select { flex: 1; background-color: #1e293b !important; color: #f8fafc !important; border: 1px solid #334155 !important; padding: 10px; border-radius: 8px; font-size: 1rem; font-weight: 600; -webkit-appearance: none !important; appearance: none !important; background-image: url('data:image/svg+xml;utf8,<svg fill="%2394a3b8" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>'); background-repeat: no-repeat; background-position: right 8px center; background-size: 20px; }
+    .btn-action { background-color: #1e293b !important; border: 1px solid #334155 !important; color: #f8fafc !important; padding: 8px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+    .btn-action:active { background-color: #334155 !important; }
+    .day-tabs { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 4px; }
+    .day-tab { flex: 1; min-width: 65px; padding: 10px 4px; background-color: #1e293b !important; border: 1px solid #334155 !important; color: #94a3b8 !important; border-radius: 8px; font-weight: 600; font-size: 0.8rem; cursor: pointer; text-align: center; white-space: nowrap; }
+    .day-tab.active { background-color: #3b82f6 !important; color: #ffffff !important; border-color: #3b82f6 !important; }
+    .section-banner { margin-top: 16px; padding: 8px 12px; background-color: #0f172a !important; border-left: 4px solid #3b82f6; font-size: 0.85rem; font-weight: 800; color: #38bdf8 !important; letter-spacing: 0.5px; text-transform: uppercase; }
+    
+    /* Exercise Card & Superset Identifiers */
+    .exercise-card { background-color: #1e293b !important; border: 1px solid #334155 !important; border-radius: 12px; padding: 14px; margin-top: 10px; position: relative; }
+    .exercise-card.superset-card { border: 1.5px solid #a855f7 !important; background-color: #17172c !important; }
+    
+    .exercise-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; gap: 8px; }
+    .exercise-title { font-size: 1.05rem; font-weight: 700; color: #f1f5f9 !important; }
+    .badges { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+    .target-badge { font-size: 0.75rem; font-weight: 700; color: #38bdf8 !important; background-color: #07364d !important; border: 1px solid #0284c7 !important; padding: 3px 8px; border-radius: 6px; white-space: nowrap; }
+    .rest-badge { font-size: 0.75rem; font-weight: 700; color: #a855f7 !important; background-color: #2e1065 !important; border: 1px solid #7e22ce !important; padding: 3px 8px; border-radius: 6px; white-space: nowrap; }
+    .superset-badge { font-size: 0.75rem; font-weight: 800; color: #f472b6 !important; background-color: #500724 !important; border: 1px solid #9d174d !important; padding: 3px 8px; border-radius: 6px; white-space: nowrap; }
+    .superset-pass-badge { font-size: 0.75rem; font-weight: 700; color: #94a3b8 !important; background-color: #0f172a !important; border: 1px dashed #475569 !important; padding: 3px 8px; border-radius: 6px; white-space: nowrap; }
+    .deload-badge { font-size: 0.75rem; font-weight: 700; color: #fbbf24 !important; background-color: #451a03 !important; border: 1px solid #b45309 !important; padding: 3px 8px; border-radius: 6px; white-space: nowrap; }
+    
+    /* Weight Intensity Badges */
+    .weight-badge { font-size: 0.75rem; font-weight: 800; padding: 3px 8px; border-radius: 6px; white-space: nowrap; }
+    .weight-badge.heavy { color: #ef4444 !important; background-color: #450a0a !important; border: 1px solid #991b1b !important; }
+    .weight-badge.moderate { color: #f59e0b !important; background-color: #451a03 !important; border: 1px solid #b45309 !important; }
+    .weight-badge.light { color: #10b981 !important; background-color: #064e3b !important; border: 1px solid #047857 !important; }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      -webkit-tap-highlight-color: transparent;
-    }
+    .notes-box { font-size: 0.78rem; color: #94a3b8 !important; background-color: #0f172a !important; padding: 6px 10px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #1e293b !important; }
+    .set-row { display: grid; grid-template-columns: 50px 1fr 1fr; gap: 10px; align-items: center; margin-bottom: 8px; background-color: #152035 !important; padding: 6px 8px; border-radius: 6px; }
+    .set-label { font-size: 0.85rem; font-weight: 600; color: #94a3b8 !important; }
+    .input-group { display: flex; flex-direction: column; }
+    .input-group label { font-size: 0.65rem; color: #94a3b8 !important; text-transform: uppercase; margin-bottom: 2px; }
+    input[type="number"] { background-color: #0f172a !important; border: 1px solid #334155 !important; color: #ffffff !important; -webkit-text-fill-color: #ffffff !important; padding: 10px 8px; border-radius: 6px; font-size: 1.1rem; width: 100%; text-align: center; -webkit-appearance: none !important; appearance: none !important; box-shadow: none !important; }
+    input[type="number"]:focus { border-color: #3b82f6 !important; outline: none; background-color: #1e293b !important; }
+    
+    /* Warm-up Checkbox Row Styles */
+    .warmup-row { display: flex; align-items: center; gap: 12px; background-color: #152035 !important; padding: 12px 14px; border-radius: 8px; cursor: pointer; border: 1px solid #334155 !important; }
+    .warmup-checkbox { width: 22px; height: 22px; accent-color: #3b82f6; cursor: pointer; }
+    .warmup-text { font-size: 0.95rem; font-weight: 600; color: #f1f5f9 !important; }
+    .warmup-row.completed .warmup-text { text-decoration: line-through; color: #64748b !important; }
 
-    body {
-      background-color: var(--bg-dark);
-      color: var(--text-main);
-      padding-bottom: 130px; /* Ensures page content isn't obscured by the persistent timer */
-    }
+    .prev-badge { font-size: 0.75rem; color: #93c5fd !important; background-color: #172554 !important; padding: 6px 8px; border-radius: 4px; margin-bottom: 8px; }
+    .card-actions { display: flex; gap: 8px; margin-top: 8px; }
+    .btn-timer-start { flex: 1; background-color: #2e1065 !important; border: 1px solid #7e22ce !important; color: #c084fc !important; padding: 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; cursor: pointer; text-align: center; }
+    .btn-timer-start:active { background-color: #581c87 !important; }
+    .toggle-matrix-btn { flex: 1; background: transparent !important; border: 1px dashed #334155 !important; color: #94a3b8 !important; padding: 8px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; }
+    .matrix-container { display: none; margin-top: 10px; overflow-x: auto; border-top: 1px solid #334155 !important; padding-top: 10px; }
+    .matrix-table { width: 100%; border-collapse: collapse; font-size: 0.75rem; color: #f8fafc !important; }
+    .matrix-table th, .matrix-table td { border: 1px solid #334155 !important; padding: 4px 6px; text-align: center; }
+    .matrix-table th { background-color: #0f172a !important; color: #94a3b8 !important; }
 
-    header {
-      position: sticky;
-      top: 0;
-      background-color: var(--bg-dark);
-      border-bottom: 1px solid var(--border-color);
-      padding: 16px;
-      z-index: 100;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    /* Always Visible Fixed Bottom Rest Timer Bar */
+    #timerBar { 
+      position: fixed !important; 
+      bottom: 0 !important; 
+      left: 0 !important; 
+      right: 0 !important; 
+      background-color: #090d16 !important; 
+      border-top: 3px solid #a855f7 !important; 
+      padding: 12px 20px; 
+      padding-bottom: max(14px, env(safe-area-inset-bottom)) !important; 
+      z-index: 99999 !important; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      max-width: 600px; 
+      margin: 0 auto; 
+      box-shadow: 0 -8px 25px rgba(0,0,0,0.85); 
     }
-
-    h1 {
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: var(--accent-blue);
-    }
-
-    .container {
-      padding: 16px;
-      max-width: 600px;
-      margin: 0 auto;
-    }
-
-    .selector-card {
-      background-color: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 16px;
-    }
-
-    label {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      display: block;
-      margin-bottom: 6px;
-    }
-
-    select, input {
-      width: 100%;
-      padding: 12px;
-      background-color: var(--bg-dark);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      color: var(--text-main);
-      font-size: 1rem;
-      margin-bottom: 12px;
-      outline: none;
-    }
-
-    select:focus, input:focus {
-      border-color: var(--accent-blue);
-    }
-
-    /* Standard Card */
-    .exercise-card {
-      background-color: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 16px;
-    }
-
-    /* Superset Container Styling */
-    .superset-card {
-      background-color: var(--card-bg);
-      border: 2px solid var(--accent-purple);
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 16px;
-      position: relative;
-    }
-
-    .superset-badge {
-      display: inline-block;
-      background-color: var(--accent-purple);
-      color: #ffffff;
-      font-size: 0.7rem;
-      font-weight: 800;
-      padding: 4px 8px;
-      border-radius: 4px;
-      letter-spacing: 0.5px;
-      margin-bottom: 12px;
-    }
-
-    .superset-divider {
-      border-bottom: 1px dashed var(--border-color);
-      margin: 14px 0;
-    }
-
-    .exercise-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-
-    .exercise-title {
-      font-weight: 600;
-      font-size: 1.1rem;
-    }
-
-    .target-info {
-      font-size: 0.85rem;
-      color: var(--accent-amber);
-    }
-
-    .set-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr auto;
-      gap: 8px;
-      align-items: center;
-      margin-bottom: 8px;
-    }
-
-    .set-label {
-      font-size: 0.9rem;
-      color: var(--text-muted);
-    }
-
-    .check-btn {
-      width: 40px;
-      height: 40px;
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
-      background-color: var(--bg-dark);
-      color: var(--accent-green);
-      font-size: 1.2rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-    }
-
-    .check-btn.completed {
-      background-color: var(--accent-green);
-      color: var(--bg-dark);
-    }
-
-    .superset-rest-container {
-      margin-top: 14px;
-      padding-top: 10px;
-      border-top: 1px solid var(--border-color);
-    }
-
-    .btn-superset-rest {
-      background-color: var(--accent-purple);
-      color: white;
-      border: none;
-      padding: 12px 16px;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 0.9rem;
-      cursor: pointer;
-      width: 100%;
-    }
-
-    /* Fixed Bottom Rest Timer - Always Visible */
-    .timer-bar {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background-color: rgba(15, 23, 42, 0.92);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border-top: 2px solid var(--accent-blue);
-      padding: 12px 16px;
-      padding-bottom: calc(12px + env(safe-area-inset-bottom));
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      z-index: 9999;
-      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
-    }
-
-    .timer-display {
-      font-size: 1.5rem;
-      font-weight: 700;
-      font-family: monospace;
-      color: var(--accent-blue);
-    }
-
-    .btn {
-      padding: 10px 14px;
-      border-radius: 8px;
-      border: none;
-      font-weight: 600;
-      font-size: 0.9rem;
-      cursor: pointer;
-    }
-
-    .btn-primary {
-      background-color: var(--accent-blue);
-      color: var(--bg-dark);
-    }
-
-    .btn-secondary {
-      background-color: var(--border-color);
-      color: var(--text-main);
-    }
-
-    .action-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top: 20px;
-    }
+    #timerDisplay { font-size: 1.6rem; font-weight: 800; color: #c084fc !important; font-family: monospace; letter-spacing: 1px; }
+    .timer-controls { display: flex; gap: 8px; }
+    .btn-timer-ctrl { background-color: #1e293b !important; border: 1px solid #334155 !important; color: #f8fafc !important; padding: 8px 14px; border-radius: 6px; font-size: 0.85rem; font-weight: 700; cursor: pointer; }
+    .btn-timer-ctrl:active { background-color: #334155 !important; }
   </style>
 </head>
 <body>
 
-  <header>
-    <h1>TACTICAL LOG</h1>
-    <span id="save-status" style="font-size: 0.8rem; color: var(--accent-green); opacity: 0.5;">Saved</span>
-  </header>
-
-  <div class="container">
-    <div class="selector-card">
-      <label for="week-select">Training Cycle</label>
-      <select id="week-select" onchange="loadWorkout()">
-        <!-- Generated via JS -->
-      </select>
-
-      <label for="day-select">Session</label>
-      <select id="day-select" onchange="loadWorkout()">
-        <option value="Day 1">Day 1: Upper Power</option>
-        <option value="Day 2">Day 2: Lower Power</option>
-        <option value="Day 3">Day 3: Conditioning / Core</option>
-        <option value="Day 4">Day 4: Upper Hypertrophy (Supersets)</option>
-        <option value="Day 5">Day 5: Lower Hypertrophy (Supersets)</option>
-        <option value="Day 6">Day 6: Tactical Capacity</option>
-        <option value="Day 7">Day 7: Active Recovery</option>
-      </select>
-    </div>
-
-    <div id="exercise-list">
-      <!-- Dynamic Exercises Rendered Here -->
-    </div>
-
-    <div class="action-grid">
-      <button class="btn btn-secondary" onclick="exportData()">Export Backup</button>
-      <button class="btn btn-secondary" onclick="importData()">Import Data</button>
-    </div>
+<header>
+  <h1 id="appTitle">24-Week Training Log</h1>
+  <div class="controls">
+    <select id="weekSelect"></select>
+    <button class="btn-action" id="btnExport">Export</button>
+    <button class="btn-action" id="btnImport">Import</button>
+    <input type="file" id="fileInput" style="display:none" accept=".json">
   </div>
+  <div class="day-tabs" id="dayTabs"></div>
+</header>
 
-  <!-- Persistent Bottom Rest Timer -->
-  <div class="timer-bar">
-    <div>
-      <span style="font-size: 0.75rem; color: var(--text-muted); display: block; letter-spacing: 0.5px;">REST TIMER</span>
-      <span class="timer-display" id="timer">01:30</span>
-    </div>
-    <div style="display: flex; gap: 6px;">
-      <button class="btn btn-secondary" onclick="startTimer(60)">60s</button>
-      <button class="btn btn-primary" onclick="startTimer(90)">90s</button>
-      <button class="btn btn-secondary" onclick="startTimer(120)">120s</button>
-      <button class="btn btn-secondary" style="background-color: #ef4444; color: white;" onclick="resetTimer()">Stop</button>
-    </div>
+<main id="exerciseList"></main>
+
+<!-- Fixed Rest Timer Bar -->
+<div id="timerBar">
+  <div>
+    <div style="font-size:0.68rem; color:#94a3b8; font-weight:700; text-transform:uppercase; letter-spacing: 0.5px;">Rest Timer</div>
+    <div id="timerDisplay">00:00</div>
   </div>
+  <div class="timer-controls">
+    <button class="btn-timer-ctrl" id="btnTimerToggle">Pause</button>
+    <button class="btn-timer-ctrl" id="btnTimerReset">Stop</button>
+  </div>
+</div>
 
-  <script>
-    let timerInterval = null;
-    let defaultRestDuration = 90;
+<script>
+const routine = {
+  "Day 1": [
+    { section: "WARM-UP (5 MIN)", name: "Rower / Bike", target: "2 min easy", sets: 1, restSec: 0, notes: "", weightIntensity: "Light" },
+    { section: "WARM-UP (5 MIN)", name: "Band Pull-Aparts", target: "15 reps", sets: 1, restSec: 0, notes: "", weightIntensity: "Light" },
+    { section: "WARM-UP (5 MIN)", name: "External Rotations", target: "10 / side", sets: 1, restSec: 0, notes: "", weightIntensity: "Light" },
+    { section: "WARM-UP (5 MIN)", name: "Scapular Push-ups", target: "10–12 reps", sets: 1, restSec: 0, notes: "", weightIntensity: "Light" },
+    { section: "WARM-UP (5 MIN)", name: "Empty-Bar Bench Press", target: "10–12 reps", sets: 1, restSec: 0, notes: "", weightIntensity: "Light" },
+    { section: "WORKOUT", name: "A. Barbell Bench Press", target: "4 × 4–6", sets: 4, restSec: 165, restLabel: "2.5–3 min", notes: "Rest 2.5–3 min between sets.", weightIntensity: "Heavy" },
+    { section: "WORKOUT", name: "B1. Neutral-Grip Lat Pulldown", target: "4 × 6–8", sets: 4, restSec: 65, restLabel: "60–75s after superset", notes: "Superset with B2. Rest 60–75s after superset.", weightIntensity: "Moderate" },
+    { section: "WORKOUT", name: "B2. Cable Crunch", target: "3–4 × 10–15", sets: 4, restSec: 65, restLabel: "60–75s after superset", notes: "Superset with B1. Rest 60–75s after superset.", weightIntensity: "Moderate" },
+    { section: "WORKOUT", name: "C1. DB Incline Press", target: "3 × 8–10", sets: 3, restSec: 80, restLabel: "75–90s after superset", notes: "Superset with C2. Rest 75–90s after superset.", weightIntensity: "Moderate" },
+    { section: "WORKOUT", name: "C2. Chest-Supported Row", target: "3 × 8–10", sets: 3, restSec: 80, restLabel: "75–90s after superset", notes: "Superset with C1. Rest 75–90s after superset.", weightIntensity: "Moderate" },
+    { section: "WORKOUT", name: "D1. Cable Y-Raise", target: "3 × 12–15", sets: 3, restSec: 60, restLabel: "60s after superset", notes: "Superset with D2. Rest 60s after superset.", weightIntensity: "Light" },
+    { section: "WORKOUT", name: "D2. Rope Triceps Pressdown", target: "3 × 10–12", sets: 3, restSec: 60, restLabel: "60s after superset", notes: "Superset with D1. Rest 60s after superset.", weightIntensity: "Light" },
+    { section: "FINISHER", name: "Suitcase Carry", target: "3 × 30–40 yd/side", sets: 3, restSec: 45, restLabel: "45s rest", notes: "Carry 30–40 yards per side.", weightIntensity: "Moderate" },
+    { section: "FINISHER", name: "Incline Treadmill Walk", target: "8–10 min", sets: 1, restSec: 0, notes: "3.0 mph @ 8–10% incline", weightIntensity: "Light" }
+  ],
+  "Day 2": [
+    { section: "WARM-UP (5 MIN)", name: "Treadmill Brisk Walk", target: "2 min", sets: 1, restSec: 0, notes: "", weightIntensity: "Light" },
+    { section: "WARM-UP (5 MIN)", name: "Bodyweight Squats", target: "10–12 reps", sets: 1, restSec: 0, notes: "", weightIntensity: "Light" },
+    { section: "WARM-UP (5 MIN)", name: "Reverse Lunges", target: "5 / leg", sets: 1, restSec: 0, notes: "", weightIntensity: "Light" },
+    { section: "WARM-UP (5 MIN)", name: "Glute Bridges", target: "12–15 reps", sets: 1, restSec: 0, notes: "", weightIntensity: "Light" },
+    { section: "WORKOUT", name: "A. Back Squat", target: "3–4 × 4–6", sets: 4, restSec: 165, restLabel: "2.5–3 min", notes: "Rest 2.5–3 min between sets.", weightIntensity: "Heavy" },
+    { section: "WORKOUT", name: "B. Bulgarian Split Squat", target: "3 × 8 / leg", sets: 3, restSec: 90, restLabel: "90s rest", notes: "2–3s eccentric down. Rest 90s.", weightIntensity: "Moderate" },
+    { section: "WORKOUT", name: "C1. Iso Leg Extension", target: "2–3 × 10–12", sets: 3, restSec: 60, restLabel: "60s after superset", notes: "1s hold at top. Superset with C2.", weightIntensity: "Moderate" },
+    { section: "WORKOUT", name: "C2. Seated Calf Raise", target: "3 × 12–15", sets: 3, restSec: 60, restLabel: "60s after superset", notes: "Superset with C1. Rest 60s after superset.", weightIntensity: "Moderate" },
+    { section: "WORKOUT", name: "D1. Cable Pallof Press", target: "3 × 10 / side", sets: 3, restSec: 60, restLabel: "60s after superset", notes: "Superset with D2.", weightIntensity: "Light" },
+    { section: "WORKOUT", name: "D2. Hanging Knee Raise", target: "3 × 10–15", sets: 3, restSec: 60, restLabel: "60s after superset", notes: "Superset with D1. Rest 60s after superset.", weightIntensity: "Light" },
+    { section: "FINISHER", name: "Assault Bike HIIT", target: "5 min", sets: 1, restSec: 0, notes: "20s hard / 40s easy × 5 rounds", weightIntensity: "Light" }
+  ],
+  "Day 3": [
+    { section: "REST & RECOVERY", name: "Active Recovery", target: "20–30 min", sets: 1, restSec: 0, notes: "20–30 min walk, light mobility, or foam rolling.", weightIntensity: "Light" }
+  ],
+  "Day 4": [
+    { section: "WARM-UP (5 MIN)", name: "Rower", target: "2 min easy", sets: 1, restSec: 0, notes: "", weightIntensity: "Light" },
+    { section: "WARM-UP (5 MIN)", name: "Band Pull-Aparts", target: "15 reps", sets: 1, restSec: 0, notes: "", weightIntensity: "Light" },
+    { section: "WARM-UP (5 MIN)", name: "Arm Circles", target: "Forward / Backward", sets: 1, restSec: 0, notes: "", weightIntensity: "Light" },
+    { section: "WARM-UP (5 MIN)", name: "Light Machine Overhead Press", target: "10–12 reps", sets: 1, restSec: 0, notes: "", weightIntensity: "Light" },
+    { section: "WORKOUT", name: "A1. Machine Overhead Press", target: "3 × 8–10", sets: 3, restSec: 65, restLabel: "60–75s after superset", notes: "Superset with A2.", weightIntensity: "Moderate" },
+    { section: "WORKOUT", name: "A2. Wide-Grip Lat Pulldown", target: "3 × 8–10", sets: 3, restSec: 65, restLabel: "60–75s after superset", notes: "Superset with A1. Rest 60–75s after superset.", weightIntensity: "Moderate" },
+    { section: "WORKOUT", name: "B1. Machine Chest Press", target: "3 × 8–12", sets: 3, restSec: 65, restLabel: "60–75s after superset", notes: "Superset with B2.", weightIntensity: "Moderate" },
+    { section: "WORKOUT", name: "B2. Machine Rear-Delt Fly", target: "3 × 12–15", sets: 3, restSec: 65, restLabel: "60–75s after superset", notes: "Superset with B1. Rest 60–75s after superset.", weightIntensity: "Light" },
+    { section: "WORKOUT", name: "C1. Seated Cable Row", target: "3 × 8–12", sets: 3, restSec: 65, restLabel: "60–75s after superset", notes: "Superset with C2.", weightIntensity: "Moderate" },
+    { section: "WORKOUT", name: "C2. Low-to-High Cable Fly", target: "3 × 10–15", sets: 3, restSec: 65, restLabel: "60–75s after superset", notes: "Superset with C1. Rest 60–75s after superset.", weightIntensity: "Light" },
+    { section: "WORKOUT", name: "D1. Incline DB Curl", target: "3 × 10–12", sets: 3, restSec: 60, restLabel: "60s after superset", notes: "Superset with D2.", weightIntensity: "Light" },
+    { section: "WORKOUT", name: "D2. Cable Wood Chop", target: "3 × 10 / side", sets: 3, restSec: 60, restLabel: "60s after superset", notes: "Superset with D1. Rest 60s after superset.", weightIntensity: "Light" },
+    { section: "FINISHER", name: "Rower Intervals", target: "6 min", sets: 1, restSec: 0, notes: "30s hard / 30s easy × 6 rounds", weightIntensity: "Light" }
+  ],
+  "Day 5": [
+    { section: "WARM-UP (5 MIN)", name: "StairMaster", target: "2 min easy", sets: 1, restSec: 0, notes: "", weightIntensity: "Light" },
+    { section: "WARM-UP (5 MIN)", name: "Bodyweight Squats", target: "12 reps", sets: 1, restSec: 0, notes: "", weightIntensity: "Light" },
+    { section: "WARM-UP (5 MIN)", name: "Dynamic Hip Gate Openers", target: "8 / side", sets: 1, restSec: 0, notes: "", weightIntensity: "Light" },
+    { section: "WARM-UP (5 MIN)", name: "Glute Bridges", target: "15 reps", sets: 1, restSec: 0, notes: "", weightIntensity: "Light" },
+    { section: "WORKOUT", name: "A. Barbell RDL", target: "3 × 6–8", sets: 3, restSec: 135, restLabel: "2–2.5 min", notes: "Rest 2–2.5 min.", weightIntensity: "Heavy" },
+    { section: "WORKOUT", name: "B. Smith Machine Hip Thrust", target: "3–4 × 8–10", sets: 4, restSec: 90, restLabel: "90s rest", notes: "1s hold at top. Rest 90s.", weightIntensity: "Moderate" },
+    { section: "WORKOUT", name: "C1. Leg Press or Hack Squat", target: "3 × 8–10", sets: 3, restSec: 75, restLabel: "75s after superset", notes: "Superset with C2.", weightIntensity: "Moderate" },
+    { section: "WORKOUT", name: "C2. Lying / Seated Leg Curl", target: "3 × 10–12", sets: 3, restSec: 75, restLabel: "75s after superset", notes: "Superset with C1. Rest 75s after superset.", weightIntensity: "Moderate" },
+    { section: "WORKOUT", name: "D. DB Reverse Lunge", target: "2–3 × 8–10 / leg", sets: 3, restSec: 60, restLabel: "60s rest", notes: "Rest 60s.", weightIntensity: "Moderate" },
+    { section: "FINISHER", name: "Ab Wheel Rollout / DB Drag-Through", target: "3 × 10–12", sets: 3, restSec: 45, restLabel: "45s rest", notes: "", weightIntensity: "Light" },
+    { section: "FINISHER", name: "StairMaster Steady-State", target: "8 min", sets: 1, restSec: 0, notes: "Steady pace.", weightIntensity: "Light" }
+  ],
+  "Day 6": [
+    { section: "WARM-UP & PRIMER (5 MIN)", name: "Assault Bike", target: "2 min easy", sets: 1, restSec: 0, notes: "", weightIntensity: "Light" },
+    { section: "WARM-UP & PRIMER (5 MIN)", name: "BW Squats + Reverse Lunges", target: "10 squats + 5 lunges/leg", sets: 1, restSec: 0, notes: "", weightIntensity: "Light" },
+    { section: "WARM-UP & PRIMER (5 MIN)", name: "Hinge-to-Squat Mobility Flow", target: "8 reps", sets: 1, restSec: 0, notes: "", weightIntensity: "Light" },
+    { section: "WARM-UP & PRIMER (5 MIN)", name: "Primer: Heavy Farmer Carry", target: "3 × 30–40 yd", sets: 3, restSec: 45, restLabel: "Rest 45s", notes: "", weightIntensity: "Heavy" },
+    { section: "WORKOUT", name: "A. Trap-Bar Deadlift", target: "3 × 5", sets: 3, restSec: 150, restLabel: "2.5 min rest", notes: "Explosive off floor. Rest 2.5 min.", weightIntensity: "Heavy" },
+    { section: "WORKOUT", name: "B1. DB Flat Bench Press", target: "3 × 8–10", sets: 3, restSec: 75, restLabel: "75s after superset", notes: "Superset with B2.", weightIntensity: "Moderate" },
+    { section: "WORKOUT", name: "B2. 1-Arm Cable Row", target: "3 × 8–10 / side", sets: 3, restSec: 75, restLabel: "75s after superset", notes: "Superset with B1. Rest 75s after superset.", weightIntensity: "Moderate" },
+    { section: "WORKOUT", name: "C1. Cable Face Pull", target: "3 × 12–15", sets: 3, restSec: 60, restLabel: "60s after superset", notes: "Superset with C2.", weightIntensity: "Light" },
+    { section: "WORKOUT", name: "C2. DB Hammer Curl", target: "3 × 10–12", sets: 3, restSec: 60, restLabel: "60s after superset", notes: "Superset with C1. Rest 60s after superset.", weightIntensity: "Light" },
+    { section: "FINISHER", name: "Assault Bike Conditioning", target: "6 min", sets: 1, restSec: 0, notes: "30s hard / 60s easy × 4 rounds", weightIntensity: "Light" }
+  ],
+  "Day 7": [
+    { section: "REST & RECOVERY", name: "Rest & Recovery", target: "Complete Rest", sets: 1, restSec: 0, notes: "Full rest day.", weightIntensity: "Light" }
+  ]
+};
 
-    // Initialize Weeks (1 to 24)
-    const weekSelect = document.getElementById('week-select');
-    for (let i = 1; i <= 24; i++) {
-      const opt = document.createElement('option');
-      opt.value = i;
-      opt.textContent = `Week ${i}${i % 4 === 0 ? ' (Deload Week)' : ''}`;
-      weekSelect.appendChild(opt);
+let currentWeek = parseInt(localStorage.getItem("active_week")) || 1;
+let currentDay = localStorage.getItem("active_day") || "Day 1";
+let store = {};
+
+// Rest Timer Variables
+let timerInterval = null;
+let timerSecondsRemaining = 0;
+let timerIsRunning = false;
+
+function loadStore() {
+  try {
+    const raw = localStorage.getItem("workout_db");
+    store = raw ? JSON.parse(raw) : {};
+  } catch (e) {
+    store = {};
+  }
+}
+
+function saveStore() {
+  try {
+    localStorage.setItem("workout_db", JSON.stringify(store));
+  } catch (e) {}
+}
+
+function updateVal(exName, setIdx, field, val) {
+  const key = `W${currentWeek}_${currentDay}_${exName}`;
+  if (!store[key]) store[key] = {};
+  if (!store[key][setIdx]) store[key][setIdx] = { weight: "", reps: "" };
+  store[key][setIdx][field] = val;
+  saveStore();
+}
+
+function updateWarmupState(exName, completed) {
+  const key = `W${currentWeek}_${currentDay}_${exName}`;
+  if (!store[key]) store[key] = {};
+  store[key].completed = completed;
+  saveStore();
+}
+
+/* Timer Implementation */
+function startRestTimer(seconds) {
+  if (seconds <= 0) return;
+  clearInterval(timerInterval);
+  timerSecondsRemaining = seconds;
+  timerIsRunning = true;
+  updateTimerDisplay();
+  
+  const toggleBtn = document.getElementById("btnTimerToggle");
+  if (toggleBtn) toggleBtn.innerText = "Pause";
+
+  // Auto-scroll fixed timer bar smoothly into full view if necessary
+  const timerBar = document.getElementById("timerBar");
+  if (timerBar) {
+    timerBar.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }
+
+  timerInterval = setInterval(() => {
+    if (timerIsRunning) {
+      timerSecondsRemaining--;
+      if (timerSecondsRemaining <= 0) {
+        clearInterval(timerInterval);
+        timerIsRunning = false;
+        timerSecondsRemaining = 0;
+        triggerTimerAlert();
+      }
+      updateTimerDisplay();
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const disp = document.getElementById("timerDisplay");
+  if (!disp) return;
+  const mins = Math.floor(timerSecondsRemaining / 60);
+  const secs = timerSecondsRemaining % 60;
+  disp.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+}
+
+function triggerTimerAlert() {
+  if ("vibrate" in navigator) {
+    navigator.vibrate([200, 100, 200, 100, 400]);
+  }
+  try {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+    gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.6);
+  } catch(e) {}
+}
+
+function toggleTimer() {
+  if (timerSecondsRemaining <= 0) return;
+  timerIsRunning = !timerIsRunning;
+  const toggleBtn = document.getElementById("btnTimerToggle");
+  if (toggleBtn) toggleBtn.innerText = timerIsRunning ? "Pause" : "Resume";
+}
+
+function resetTimer() {
+  clearInterval(timerInterval);
+  timerIsRunning = false;
+  timerSecondsRemaining = 0;
+  updateTimerDisplay();
+  const toggleBtn = document.getElementById("btnTimerToggle");
+  if (toggleBtn) toggleBtn.innerText = "Pause";
+}
+
+function toggleMatrix(matrixContainerId, exName, defaultSets) {
+  const container = document.getElementById(matrixContainerId);
+  if (!container) return;
+
+  if (container.style.display === "block") {
+    container.style.display = "none";
+    return;
+  }
+
+  if (!container.dataset.rendered) {
+    let rows = "";
+    for (let w = 1; w <= 24; w++) {
+      const wKey = `W${w}_${currentDay}_${exName}`;
+      const isMatrixDeload = w % 4 === 0;
+      const totalSets = isMatrixDeload ? Math.max(1, Math.ceil(defaultSets / 2)) : defaultSets;
+      let rowStr = [];
+      for (let s = 0; s < totalSets; s++) {
+        const d = store[wKey]?.[s];
+        if (d && (d.weight || d.reps)) {
+          rowStr.push(`${d.weight || 0}x${d.reps || 0}`);
+        }
+      }
+      if (rowStr.length > 0) {
+        rows += `<tr><td>W${w}${isMatrixDeload ? ' (DL)' : ''}</td><td>${rowStr.join(", ")}</td></tr>`;
+      }
+    }
+    container.querySelector('tbody').innerHTML = rows || '<tr><td colspan="2">No data logged yet</td></tr>';
+    container.dataset.rendered = "true";
+  }
+
+  container.style.display = "block";
+}
+
+// Helper to determine Superset properties
+function getSupersetInfo(name) {
+  const match = name.match(/^([A-Z])([12])\./);
+  if (!match) return { isSuperset: false };
+  return {
+    isSuperset: true,
+    group: match[1],
+    position: parseInt(match[2]),
+    isFirst: match[2] === "1",
+    isSecond: match[2] === "2"
+  };
+}
+
+function renderApp() {
+  const weekSelect = document.getElementById("weekSelect");
+  if (weekSelect) {
+    currentWeek = parseInt(weekSelect.value) || 1;
+    localStorage.setItem("active_week", currentWeek);
+  }
+  const isDeloadWeek = currentWeek % 4 === 0;
+
+  const appTitle = document.getElementById("appTitle");
+  if (appTitle) {
+    appTitle.innerHTML = isDeloadWeek 
+      ? `24-Week Log <span style="color:#f59e0b !important; font-size:0.95rem;">(Week ${currentWeek} Deload)</span>` 
+      : `24-Week Training Log`;
+  }
+
+  const container = document.getElementById("exerciseList");
+  if (!container) return;
+  
+  const fragment = document.createDocumentFragment();
+  const exercises = routine[currentDay] || [];
+
+  let lastSection = "";
+
+  exercises.forEach((ex, exIdx) => {
+    if (ex.section !== lastSection) {
+      lastSection = ex.section;
+      const sectionBanner = document.createElement("div");
+      sectionBanner.className = "section-banner";
+      sectionBanner.innerText = ex.section;
+      fragment.appendChild(sectionBanner);
     }
 
-    function loadWorkout() {
-      const week = weekSelect.value;
-      const day = document.getElementById('day-select').value;
-      const list = document.getElementById('exercise-list');
-      list.innerHTML = '';
+    const supersetInfo = getSupersetInfo(ex.name);
 
-      const isDeload = (week % 4 === 0);
-      const targetSets = isDeload ? 2 : 4;
+    const card = document.createElement("div");
+    card.className = `exercise-card ${supersetInfo.isSuperset ? 'superset-card' : ''}`;
 
-      const workoutTemplates = {
-        'Day 1': ['Bench Press', 'Weighted Pull-Ups', 'Overhead Press', 'Barbell Rows'],
-        'Day 2': ['Squats', 'Romanian Deadlifts', 'Leg Press', 'Calf Raises'],
-        'Day 3': ['Zone 2 Ruck / Run', 'Plank Variations', 'Hanging Leg Raises'],
-        'Day 4': [
-          'Bench Press',
-          { type: 'superset', name: 'Superset A', exercises: ['Incline Dumbbell Press', 'Lat Pulldowns'], rest: 90 },
-          { type: 'superset', name: 'Superset B', exercises: ['Dumbbell Lateral Raises', 'Bicep Curls'], rest: 60 }
-        ],
-        'Day 5': [
-          { type: 'superset', name: 'Superset A', exercises: ['Zercher Squats', 'Plate-Loaded Belt Squats'], rest: 120 },
-          'Hamstring Curls', 
-          'Ab Rollouts'
-        ],
-        'Day 6': ['Kettlebell Swings', 'Farmer Carries', 'Sandbag Gets-Ups'],
-        'Day 7': ['Mobility Work', 'Light Walking', 'Stretching']
-      };
+    const isWarmup = ex.section.toUpperCase().includes("WARM-UP");
 
-      const blocks = workoutTemplates[day] || ['Main Lift', 'Accessory 1', 'Accessory 2'];
+    if (isWarmup) {
+      const key = `W${currentWeek}_${currentDay}_${ex.name}`;
+      const isChecked = !!store[key]?.completed;
 
-      blocks.forEach((item, blockIndex) => {
-        // Render Superset Block
-        if (typeof item === 'object' && item.type === 'superset') {
-          const card = document.createElement('div');
-          card.className = 'superset-card';
+      const row = document.createElement("label");
+      row.className = `warmup-row ${isChecked ? 'completed' : ''}`;
 
-          let supersetHTML = `<div class="superset-badge">⚡ ${item.name.toUpperCase()} (SUPERSET)</div>`;
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.className = "warmup-checkbox";
+      checkbox.checked = isChecked;
 
-          item.exercises.forEach((exName, exIndex) => {
-            if (exIndex > 0) supersetHTML += `<div class="superset-divider"></div>`;
-
-            let setsHTML = '';
-            for (let s = 1; s <= targetSets; s++) {
-              const key = `w${week}_d${day}_b${blockIndex}_e${exIndex}_s${s}`;
-              const savedData = JSON.parse(localStorage.getItem(key) || '{}');
-
-              setsHTML += `
-                <div class="set-row">
-                  <span class="set-label">Set ${s}</span>
-                  <input type="number" placeholder="lbs" value="${savedData.weight || ''}" onchange="saveSet('${key}', 'weight', this.value)">
-                  <input type="number" placeholder="reps" value="${savedData.reps || ''}" onchange="saveSet('${key}', 'reps', this.value)">
-                  <!-- Individual superset sets do not trigger rest automatically -->
-                  <button class="check-btn ${savedData.done ? 'completed' : ''}" onclick="toggleSet(this, '${key}', false)">✓</button>
-                </div>
-              `;
-            }
-
-            supersetHTML += `
-              <div class="exercise-header">
-                <span class="exercise-title">${exName}</span>
-                <span class="target-info">${isDeload ? 'Deload: 2 Sets' : '4 Sets'}</span>
-              </div>
-              ${setsHTML}
-            `;
-          });
-
-          // Single rest timer trigger for the full superset block
-          const restTime = item.rest || defaultRestDuration;
-          supersetHTML += `
-            <div class="superset-rest-container">
-              <button class="btn-superset-rest" onclick="startTimer(${restTime})">Start Superset Rest (${restTime}s)</button>
-            </div>
-          `;
-
-          card.innerHTML = supersetHTML;
-          list.appendChild(card);
-        } 
-        // Render Standard Lift Block
-        else {
-          const card = document.createElement('div');
-          card.className = 'exercise-card';
-
-          let setsHTML = '';
-          for (let s = 1; s <= targetSets; s++) {
-            const key = `w${week}_d${day}_b${blockIndex}_s${s}`;
-            const savedData = JSON.parse(localStorage.getItem(key) || '{}');
-
-            setsHTML += `
-              <div class="set-row">
-                <span class="set-label">Set ${s}</span>
-                <input type="number" placeholder="lbs" value="${savedData.weight || ''}" onchange="saveSet('${key}', 'weight', this.value)">
-                <input type="number" placeholder="reps" value="${savedData.reps || ''}" onchange="saveSet('${key}', 'reps', this.value)">
-                <!-- Single exercises auto-trigger default rest when checked -->
-                <button class="check-btn ${savedData.done ? 'completed' : ''}" onclick="toggleSet(this, '${key}', true)">✓</button>
-              </div>
-            `;
-          }
-
-          card.innerHTML = `
-            <div class="exercise-header">
-              <span class="exercise-title">${item}</span>
-              <span class="target-info">${isDeload ? 'Deload: 2 Sets' : '4 Sets'}</span>
-            </div>
-            ${setsHTML}
-          `;
-          list.appendChild(card);
+      checkbox.addEventListener("change", (e) => {
+        const checked = e.target.checked;
+        updateWarmupState(ex.name, checked);
+        if (checked) {
+          row.classList.add("completed");
+        } else {
+          row.classList.remove("completed");
         }
       });
-    }
 
-    function saveSet(key, field, val) {
-      const data = JSON.parse(localStorage.getItem(key) || '{}');
-      data[field] = val;
-      localStorage.setItem(key, JSON.stringify(data));
-      flashSaveStatus();
-    }
+      const text = document.createElement("span");
+      text.className = "warmup-text";
+      text.innerText = `${ex.name} — ${ex.target}`;
 
-    function toggleSet(btn, key, autoTimer) {
-      const data = JSON.parse(localStorage.getItem(key) || '{}');
-      data.done = !data.done;
-      localStorage.setItem(key, JSON.stringify(data));
-      btn.classList.toggle('completed', data.done);
+      row.appendChild(checkbox);
+      row.appendChild(text);
+      card.appendChild(row);
 
-      if (data.done && autoTimer) {
-        startTimer(defaultRestDuration);
+      if (ex.notes) {
+        const notesDiv = document.createElement("div");
+        notesDiv.className = "notes-box";
+        notesDiv.style.marginTop = "8px";
+        notesDiv.innerText = ex.notes;
+        card.appendChild(notesDiv);
       }
-      
-      flashSaveStatus();
-    }
+    } else {
+      // Regular Exercise Layout
+      const effectiveSets = isDeloadWeek ? Math.max(1, Math.ceil(ex.sets / 2)) : ex.sets;
 
-    function flashSaveStatus() {
-      const status = document.getElementById('save-status');
-      status.style.opacity = '1';
-      setTimeout(() => { status.style.opacity = '0.5'; }, 1000);
-    }
+      let setsContainer = document.createElement("div");
+      const prevKey = `W${currentWeek - 1}_${currentDay}_${ex.name}`;
+      const prevDataSet1 = currentWeek > 1 ? store[prevKey]?.[0] : null;
 
-    // Timer Controls - Autostarts and populates duration
-    function startTimer(seconds) {
-      clearInterval(timerInterval);
-      let remaining = seconds;
-      updateTimerDisplay(remaining);
+      if (prevDataSet1 && (prevDataSet1.weight || prevDataSet1.reps)) {
+        const prevWt = parseFloat(prevDataSet1.weight) || 0;
+        const prevBadge = document.createElement("div");
+        prevBadge.className = "prev-badge";
+        prevBadge.innerHTML = (isDeloadWeek && prevWt > 0)
+          ? `W${currentWeek - 1} Weight: ${prevWt} lbs ➔ <b>Deload Target Weight (50%): ${Math.round((prevWt * 0.5) / 5) * 5} lbs</b>`
+          : `Prev Week Set 1 Baseline: ${prevDataSet1.weight || 0} lbs × ${prevDataSet1.reps || 0} reps`;
+        setsContainer.appendChild(prevBadge);
+      }
 
-      timerInterval = setInterval(() => {
-        remaining--;
-        if (remaining <= 0) {
-          clearInterval(timerInterval);
-          updateTimerDisplay(0);
-          if ('vibrate' in navigator) navigator.vibrate([200, 100, 200]);
-        } else {
-          updateTimerDisplay(remaining);
+      for (let s = 0; s < effectiveSets; s++) {
+        const key = `W${currentWeek}_${currentDay}_${ex.name}`;
+        const savedData = store[key]?.[s] || { weight: "", reps: "" };
+
+        const setRow = document.createElement("div");
+        setRow.className = "set-row";
+
+        setRow.innerHTML = `
+          <span class="set-label">Set ${s + 1}</span>
+          <div class="input-group">
+            <label>Lbs</label>
+            <input type="number" inputmode="decimal" placeholder="0" class="input-w" value="${savedData.weight || ''}">
+          </div>
+          <div class="input-group">
+            <label>Reps</label>
+            <input type="number" inputmode="numeric" placeholder="0" class="input-r" value="${savedData.reps || ''}">
+          </div>
+        `;
+
+        setRow.querySelector('.input-w').addEventListener("input", (e) => updateVal(ex.name, s, "weight", e.target.value));
+        setRow.querySelector('.input-r').addEventListener("input", (e) => updateVal(ex.name, s, "reps", e.target.value));
+        setsContainer.appendChild(setRow);
+      }
+
+      const matrixId = `matrix-${exIdx}`;
+      const weightClass = ex.weightIntensity ? ex.weightIntensity.toLowerCase() : 'moderate';
+      const headerDiv = document.createElement("div");
+      headerDiv.className = "exercise-header";
+      headerDiv.innerHTML = `
+        <div class="exercise-title">${ex.name}</div>
+        <div class="badges">
+          ${supersetInfo.isSuperset ? `<div class="superset-badge">⚡ SUPERSET ${supersetInfo.group}</div>` : ''}
+          ${isDeloadWeek ? `<div class="deload-badge">🔥 Deload (${effectiveSets} Sets)</div>` : ''}
+          <div class="weight-badge ${weightClass}">${ex.weightIntensity || 'Moderate'}</div>
+          <div class="target-badge">${ex.target}</div>
+          ${ex.restLabel ? `<div class="rest-badge">⏱️ ${ex.restLabel}</div>` : ''}
+        </div>
+      `;
+
+      card.appendChild(headerDiv);
+
+      if (ex.notes) {
+        const notesDiv = document.createElement("div");
+        notesDiv.className = "notes-box";
+        notesDiv.innerText = ex.notes;
+        card.appendChild(notesDiv);
+      }
+
+      card.appendChild(setsContainer);
+
+      const cardActions = document.createElement("div");
+      cardActions.className = "card-actions";
+
+      // Display Rest Button: ONLY for non-supersets OR the second item of a superset (e.g. B2, C2, D2)
+      if (ex.restSec && ex.restSec > 0) {
+        if (!supersetInfo.isSuperset || supersetInfo.isSecond) {
+          const timerBtn = document.createElement("button");
+          timerBtn.className = "btn-timer-start";
+          timerBtn.innerText = supersetInfo.isSuperset
+            ? `⏱️ Start Superset ${ex.restLabel || (ex.restSec + 's')} Rest`
+            : `⏱️ Start ${ex.restLabel || (ex.restSec + 's')} Timer`;
+          timerBtn.addEventListener("click", () => startRestTimer(ex.restSec));
+          cardActions.appendChild(timerBtn);
+        } else if (supersetInfo.isFirst) {
+          const passBadge = document.createElement("div");
+          passBadge.className = "superset-pass-badge";
+          passBadge.innerText = `🔄 Move to ${supersetInfo.group}2 next`;
+          cardActions.appendChild(passBadge);
         }
-      }, 1000);
+      }
+
+      const toggleBtn = document.createElement("button");
+      toggleBtn.className = "toggle-matrix-btn";
+      toggleBtn.innerText = "📊 History";
+      toggleBtn.addEventListener("click", () => toggleMatrix(matrixId, ex.name, ex.sets));
+      cardActions.appendChild(toggleBtn);
+
+      const matrixDiv = document.createElement("div");
+      matrixDiv.id = matrixId;
+      matrixDiv.className = "matrix-container";
+      matrixDiv.innerHTML = `<table class="matrix-table"><thead><tr><th>Week</th><th>Logged Sets (Lbs x Reps)</th></tr></thead><tbody></tbody></table>`;
+
+      card.appendChild(cardActions);
+      card.appendChild(matrixDiv);
     }
 
-    function resetTimer() {
-      clearInterval(timerInterval);
-      updateTimerDisplay(defaultRestDuration);
-    }
+    fragment.appendChild(card);
+  });
 
-    function updateTimerDisplay(sec) {
-      const m = Math.floor(sec / 60).toString().padStart(2, '0');
-      const s = (sec % 60).toString().padStart(2, '0');
-      document.getElementById('timer').textContent = `${m}:${s}`;
-    }
+  container.innerHTML = "";
+  container.appendChild(fragment);
+}
 
-    // Backup & Restore
-    function exportData() {
-      const data = JSON.stringify(localStorage);
-      const blob = new Blob([data], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `tactical_workout_backup_${new Date().toISOString().slice(0,10)}.json`;
-      a.click();
-    }
+function exportData() {
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(store, null, 2));
+  const dlAnchorElem = document.createElement('a');
+  dlAnchorElem.setAttribute("href", dataStr);
+  dlAnchorElem.setAttribute("download", `workout_backup_${new Date().toISOString().slice(0,10)}.json`);
+  document.body.appendChild(dlAnchorElem);
+  dlAnchorElem.click();
+  dlAnchorElem.remove();
+}
 
-    function importData() {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = 'application/json';
-      input.onchange = e => {
-        const file = e.target.files[0];
-        const reader = new FileReader();
-        reader.onload = event => {
-          const data = JSON.parse(event.target.result);
-          Object.keys(data).forEach(key => localStorage.setItem(key, data[key]));
-          loadWorkout();
-          alert('Workout logs imported successfully!');
-        };
-        reader.readAsText(file);
-      };
-      input.click();
+function importData(e) {
+  const fileReader = new FileReader();
+  fileReader.onload = function(event) {
+    try {
+      const parsed = JSON.parse(event.target.result);
+      if (parsed && typeof parsed === 'object') {
+        store = parsed;
+        saveStore();
+        renderApp();
+        alert("Backup imported successfully!");
+      }
+    } catch (err) {
+      alert("Invalid JSON backup file.");
     }
+  };
+  if (e.target.files[0]) {
+    fileReader.readAsText(e.target.files[0]);
+  }
+}
 
-    loadWorkout();
-  </script>
+function init() {
+  loadStore();
+  
+  const weekSelect = document.getElementById("weekSelect");
+  if (weekSelect) {
+    let opts = "";
+    for (let w = 1; w <= 24; w++) {
+      opts += `<option value="${w}">Week ${w}${w % 4 === 0 ? ' (Deload 🔄)' : ''}</option>`;
+    }
+    weekSelect.innerHTML = opts;
+    weekSelect.value = currentWeek;
+    weekSelect.addEventListener("change", renderApp);
+  }
+
+  const days = ["Day 1", "Day 2", "Day 3", "Day 4", "Day 5", "Day 6", "Day 7"];
+  const dayTabs = document.getElementById("dayTabs");
+  if (dayTabs) {
+    dayTabs.innerHTML = days.map(day => 
+      `<button class="day-tab ${day === currentDay ? 'active' : ''}">${day}</button>`
+    ).join("");
+    
+    dayTabs.addEventListener("click", (e) => {
+      if (e.target.classList.contains("day-tab")) {
+        const selectedDayIndex = Array.from(dayTabs.children).indexOf(e.target);
+        currentDay = days[selectedDayIndex];
+        localStorage.setItem("active_day", currentDay);
+        document.querySelectorAll('.day-tab').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        renderApp();
+      }
+    });
+  }
+
+  const btnExport = document.getElementById("btnExport");
+  const btnImport = document.getElementById("btnImport");
+  const fileInput = document.getElementById("fileInput");
+
+  if (btnExport) btnExport.addEventListener("click", exportData);
+  if (btnImport && fileInput) {
+    btnImport.addEventListener("click", () => fileInput.click());
+    fileInput.addEventListener("change", importData);
+  }
+
+  const btnTimerToggle = document.getElementById("btnTimerToggle");
+  const btnTimerReset = document.getElementById("btnTimerReset");
+  if (btnTimerToggle) btnTimerToggle.addEventListener("click", toggleTimer);
+  if (btnTimerReset) btnTimerReset.addEventListener("click", resetTimer);
+
+  requestAnimationFrame(renderApp);
+}
+
+window.addEventListener('DOMContentLoaded', init);
+</script>
 </body>
 </html>
