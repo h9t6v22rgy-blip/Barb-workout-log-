@@ -33,7 +33,7 @@
     body {
       background-color: var(--bg-dark);
       color: var(--text-main);
-      padding-bottom: 120px; /* Space for persistent bottom timer */
+      padding-bottom: 130px; /* Ensures page content isn't obscured by the persistent timer */
     }
 
     header {
@@ -118,15 +118,15 @@
       color: #ffffff;
       font-size: 0.7rem;
       font-weight: 800;
-      padding: 2px 8px;
+      padding: 4px 8px;
       border-radius: 4px;
       letter-spacing: 0.5px;
-      margin-bottom: 8px;
+      margin-bottom: 12px;
     }
 
     .superset-divider {
       border-bottom: 1px dashed var(--border-color);
-      margin: 12px 0;
+      margin: 14px 0;
     }
 
     .exercise-header {
@@ -182,15 +182,13 @@
       margin-top: 14px;
       padding-top: 10px;
       border-top: 1px solid var(--border-color);
-      display: flex;
-      justify-content: flex-end;
     }
 
     .btn-superset-rest {
       background-color: var(--accent-purple);
       color: white;
       border: none;
-      padding: 10px 16px;
+      padding: 12px 16px;
       border-radius: 8px;
       font-weight: 600;
       font-size: 0.9rem;
@@ -198,15 +196,15 @@
       width: 100%;
     }
 
-    /* Fixed Bottom Rest Timer */
+    /* Fixed Bottom Rest Timer - Always Visible */
     .timer-bar {
       position: fixed;
       bottom: 0;
       left: 0;
       right: 0;
-      background-color: #1e293be6;
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
+      background-color: rgba(15, 23, 42, 0.92);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       border-top: 2px solid var(--accent-blue);
       padding: 12px 16px;
       padding-bottom: calc(12px + env(safe-area-inset-bottom));
@@ -214,11 +212,11 @@
       justify-content: space-between;
       align-items: center;
       z-index: 9999;
-      transform: translateZ(0);
+      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
     }
 
     .timer-display {
-      font-size: 1.4rem;
+      font-size: 1.5rem;
       font-weight: 700;
       font-family: monospace;
       color: var(--accent-blue);
@@ -271,7 +269,7 @@
         <option value="Day 2">Day 2: Lower Power</option>
         <option value="Day 3">Day 3: Conditioning / Core</option>
         <option value="Day 4">Day 4: Upper Hypertrophy (Supersets)</option>
-        <option value="Day 5">Day 5: Lower Hypertrophy</option>
+        <option value="Day 5">Day 5: Lower Hypertrophy (Supersets)</option>
         <option value="Day 6">Day 6: Tactical Capacity</option>
         <option value="Day 7">Day 7: Active Recovery</option>
       </select>
@@ -323,18 +321,17 @@
       const isDeload = (week % 4 === 0);
       const targetSets = isDeload ? 2 : 4;
 
-      // Routine Structure - Arrays indicate individual lifts, objects indicate Superset groupings
       const workoutTemplates = {
         'Day 1': ['Bench Press', 'Weighted Pull-Ups', 'Overhead Press', 'Barbell Rows'],
         'Day 2': ['Squats', 'Romanian Deadlifts', 'Leg Press', 'Calf Raises'],
         'Day 3': ['Zone 2 Ruck / Run', 'Plank Variations', 'Hanging Leg Raises'],
         'Day 4': [
           'Bench Press',
-          { type: 'superset', name: 'Superset A', exercises: ['Incline Dumbbell Press', 'Lat Pulldowns'] },
-          { type: 'superset', name: 'Superset B', exercises: ['Dumbbell Lateral Raises', 'Bicep Curls'] }
+          { type: 'superset', name: 'Superset A', exercises: ['Incline Dumbbell Press', 'Lat Pulldowns'], rest: 90 },
+          { type: 'superset', name: 'Superset B', exercises: ['Dumbbell Lateral Raises', 'Bicep Curls'], rest: 60 }
         ],
         'Day 5': [
-          { type: 'superset', name: 'Superset A', exercises: ['Zercher Squats', 'Plate-Loaded Belt Squats'] },
+          { type: 'superset', name: 'Superset A', exercises: ['Zercher Squats', 'Plate-Loaded Belt Squats'], rest: 120 },
           'Hamstring Curls', 
           'Ab Rollouts'
         ],
@@ -345,12 +342,12 @@
       const blocks = workoutTemplates[day] || ['Main Lift', 'Accessory 1', 'Accessory 2'];
 
       blocks.forEach((item, blockIndex) => {
-        // If block is a Superset
+        // Render Superset Block
         if (typeof item === 'object' && item.type === 'superset') {
           const card = document.createElement('div');
           card.className = 'superset-card';
 
-          let supersetHTML = `<div class="superset-badge">⚡ ${item.name.toUpperCase()}</div>`;
+          let supersetHTML = `<div class="superset-badge">⚡ ${item.name.toUpperCase()} (SUPERSET)</div>`;
 
           item.exercises.forEach((exName, exIndex) => {
             if (exIndex > 0) supersetHTML += `<div class="superset-divider"></div>`;
@@ -365,6 +362,7 @@
                   <span class="set-label">Set ${s}</span>
                   <input type="number" placeholder="lbs" value="${savedData.weight || ''}" onchange="saveSet('${key}', 'weight', this.value)">
                   <input type="number" placeholder="reps" value="${savedData.reps || ''}" onchange="saveSet('${key}', 'reps', this.value)">
+                  <!-- Individual superset sets do not trigger rest automatically -->
                   <button class="check-btn ${savedData.done ? 'completed' : ''}" onclick="toggleSet(this, '${key}', false)">✓</button>
                 </div>
               `;
@@ -379,17 +377,18 @@
             `;
           });
 
-          // Single Rest Trigger at the end of the Superset Block
+          // Single rest timer trigger for the full superset block
+          const restTime = item.rest || defaultRestDuration;
           supersetHTML += `
             <div class="superset-rest-container">
-              <button class="btn-superset-rest" onclick="startTimer(defaultRestDuration)">Start Superset Rest (90s)</button>
+              <button class="btn-superset-rest" onclick="startTimer(${restTime})">Start Superset Rest (${restTime}s)</button>
             </div>
           `;
 
           card.innerHTML = supersetHTML;
           list.appendChild(card);
         } 
-        // Standard Single Lift Block
+        // Render Standard Lift Block
         else {
           const card = document.createElement('div');
           card.className = 'exercise-card';
@@ -404,6 +403,7 @@
                 <span class="set-label">Set ${s}</span>
                 <input type="number" placeholder="lbs" value="${savedData.weight || ''}" onchange="saveSet('${key}', 'weight', this.value)">
                 <input type="number" placeholder="reps" value="${savedData.reps || ''}" onchange="saveSet('${key}', 'reps', this.value)">
+                <!-- Single exercises auto-trigger default rest when checked -->
                 <button class="check-btn ${savedData.done ? 'completed' : ''}" onclick="toggleSet(this, '${key}', true)">✓</button>
               </div>
             `;
@@ -434,7 +434,6 @@
       localStorage.setItem(key, JSON.stringify(data));
       btn.classList.toggle('completed', data.done);
 
-      // Only standard single lifts automatically trigger the rest timer on completion
       if (data.done && autoTimer) {
         startTimer(defaultRestDuration);
       }
@@ -448,7 +447,7 @@
       setTimeout(() => { status.style.opacity = '0.5'; }, 1000);
     }
 
-    // Timer Controls
+    // Timer Controls - Autostarts and populates duration
     function startTimer(seconds) {
       clearInterval(timerInterval);
       let remaining = seconds;
